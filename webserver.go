@@ -4,7 +4,7 @@ import (
 	"flag"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/NYTimes/gziphandler"
 )
 
 var port string
@@ -17,9 +17,11 @@ func init() {
 
 func main() {
 	bindval = ":" + port
-	r := mux.NewRouter()
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir(".")))
-	http.Handle("/", r)
+	fs := http.FileServer(http.Dir("."))
+	mux := http.NewServeMux()
+	mux.Handle("/", fs)
+	withGz := gziphandler.GzipHandler(mux)
+	http.Handle("/", withGz)
 	if err := http.ListenAndServe(bindval, nil); err != nil {
 		panic(err)
 	}
