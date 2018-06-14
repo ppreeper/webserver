@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 )
 
 var port string
@@ -24,10 +23,7 @@ func init() {
 func main() {
 	bindval = ":" + port
 	fs := http.FileServer(http.Dir(dir))
-	r := mux.NewRouter()
-	r.PathPrefix("/").Handler(fs)
-	http.Handle("/", r)
-	if err := http.ListenAndServe(bindval, MaxAge(handlers.CompressHandler(r))); err != nil {
+	if err := http.ListenAndServe(bindval, MaxAge(handlers.CompressHandler(fs))); err != nil {
 		panic(err)
 	}
 }
