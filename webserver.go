@@ -7,23 +7,22 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gorilla/handlers"
+	"github.com/go-chi/chi/middleware"
 )
 
-var port string
+var addr string
 var dir string
 var bindval string
 
 func init() {
-	flag.StringVar(&port, "port", "8080", "port to start")
+	flag.StringVar(&addr, "addr", ":8080", "addr to start")
 	flag.StringVar(&dir, "d", ".", "directory to serve")
 	flag.Parse()
 }
 
 func main() {
-	bindval = ":" + port
 	fs := http.FileServer(http.Dir(dir))
-	if err := http.ListenAndServe(bindval, MaxAge(handlers.CompressHandler(fs))); err != nil {
+	if err := http.ListenAndServe(addr, MaxAge(middleware.DefaultCompress(fs))); err != nil {
 		panic(err)
 	}
 }
