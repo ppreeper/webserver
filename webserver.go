@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 	"path/filepath"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
 
@@ -21,8 +23,28 @@ func init() {
 }
 
 func main() {
+	r := chi.NewRouter()
+
+	// A good base middleware stack
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	// Set a timeout value on the request context (ctx), that will signal
+	// through ctx.Done() that the request has timed out and further
+	// processing should be stopped.
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	// Compression on data
+	r.Use(middleware.DefaultCompress)
+
+	r.Mount("/debug", middleware.Profiler()) // ..routes return r })
+
 	fs := http.FileServer(http.Dir(dir))
-	if err := http.ListenAndServe(addr, MaxAge(middleware.DefaultCompress(fs))); err != nil {
+	r.Handle("/*", fs)
+
+	if err := http.ListenAndServe(addr, MaxAge(r)); err != nil {
 		panic(err)
 	}
 }
