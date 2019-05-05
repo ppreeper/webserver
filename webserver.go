@@ -14,11 +14,13 @@ import (
 
 var addr string
 var dir string
+var log bool
 var bindval string
 
 func init() {
 	flag.StringVar(&addr, "addr", ":8080", "addr to start")
 	flag.StringVar(&dir, "d", ".", "directory to serve")
+	flag.BoolVar(&log, "l", false, "enable logging")
 	flag.Parse()
 }
 
@@ -28,7 +30,9 @@ func main() {
 	// A good base middleware stack
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	if log {
+		r.Use(middleware.Logger)
+	}
 	r.Use(middleware.Recoverer)
 
 	// Set a timeout value on the request context (ctx), that will signal
