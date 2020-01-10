@@ -17,14 +17,12 @@ var dir string
 var log bool
 var bindval string
 
-func init() {
+func main() {
 	flag.StringVar(&addr, "addr", ":8080", "addr to start")
 	flag.StringVar(&dir, "d", ".", "directory to serve")
 	flag.BoolVar(&log, "l", false, "enable logging")
 	flag.Parse()
-}
 
-func main() {
 	r := chi.NewRouter()
 
 	// A good base middleware stack
