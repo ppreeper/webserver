@@ -4,11 +4,10 @@ import (
 	"flag"
 	_ "net/http/pprof"
 
-	"github.com/gofiber/compression"
-	"github.com/gofiber/fiber"
-	"github.com/gofiber/helmet"
-	"github.com/gofiber/logger"
-	"github.com/gofiber/recover"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func main() {
@@ -25,45 +24,9 @@ func main() {
 	if log {
 		app.Use(logger.New())
 	}
-	app.Use(compression.New())
-	app.Use(helmet.New())
-	// Optional
-	cfg := recover.Config{
-		Handler: func(c *fiber.Ctx, err error) {
-			c.SendString(err.Error())
-			c.SendStatus(500)
-		},
-	}
-
-	app.Use(recover.New(cfg))
+	app.Use(compress.New())
+	app.Use(recover.New())
 
 	app.Static("/", dir)
 	app.Listen(addr)
 }
-
-// MaxAge sets expire headers based on extension
-// func MaxAge(h http.Handler) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		var age time.Duration
-// 		ext := filepath.Ext(r.URL.String())
-
-// 		// Timings are based on github.com/h5bp/server-configs-nginx
-
-// 		switch ext {
-// 		case ".rss", ".atom":
-// 			age = time.Hour / time.Second
-// 		case ".css", ".js":
-// 			age = (time.Hour * 24 * 365) / time.Second
-// 		case ".jpg", ".jpeg", ".gif", ".png", ".ico", ".cur", ".gz", ".svg", ".svgz", ".mp4", ".ogg", ".ogv", ".webm", ".htc":
-// 			age = (time.Hour * 24 * 30) / time.Second
-// 		default:
-// 			age = 0
-// 		}
-
-// 		if age > 0 {
-// 			w.Header().Add("Cache-Control", fmt.Sprintf("max-age=%d, public, must-revalidate, proxy-revalidate", age))
-// 		}
-
-// 		h.ServeHTTP(w, r)
-// 	})
-// }
