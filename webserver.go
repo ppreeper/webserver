@@ -27,6 +27,9 @@ func main() {
 	app.Use(compress.New())
 	app.Use(recover.New())
 
-	app.Static("/", dir)
+	app.Static("/", dir, fiber.Static{
+		Compress: true,
+		Browse:   true,
+	})
 	app.Listen(addr)
 }
